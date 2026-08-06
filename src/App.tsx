@@ -127,17 +127,16 @@ export default function App() {
         // Fallback below
       }
     }
-    // If empty storage, default to INITIAL_LIDERANCAS so the system starts populated with of Amapá's sample network
-    return INITIAL_LIDERANCAS;
+    return [];
   });
 
   // Coordenadores Regionais State (Persisted in LocalStorage)
   const [coordenadoresRegionais, setCoordenadoresRegionais] = useState<CoordenadorRegional[]>(() => {
     const saved = localStorage.getItem("geoscan_coordenadores");
     try {
-      return saved ? JSON.parse(saved) : INITIAL_COORDENADORES;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return INITIAL_COORDENADORES;
+      return [];
     }
   });
 
@@ -172,7 +171,7 @@ export default function App() {
         // Fallback below
       }
     }
-    return INITIAL_ELEITORES;
+    return [];
   });
 
   // Global Goal Campaign State (Computed from Municipios)
@@ -226,42 +225,7 @@ export default function App() {
     });
   };
 
-  // Clear ALL data back to default Mocks (useful helper button in UI for sandbox prototyping)
-  const handleResetToMocks = () => {
-    setModalConfig({
-      isOpen: true,
-      title: "Carregar Exemplo de Campanha?",
-      message: "Isso carregará dados de demonstração originais de regiões do Amapá para testes rápidos (Coordenadores, Líderes e Apoiadores fictícios). Deseja continuar?",
-      variant: "info",
-      onConfirm: () => {
-        setCoordenadoresRegionais(INITIAL_COORDENADORES);
-        setLiderancas(INITIAL_LIDERANCAS);
-        setEleitores(INITIAL_ELEITORES);
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
-        showToast("Campanha modelo carregada com sucesso!");
-      }
-    });
-  };
 
-  // Completely wipe data to empty arrays (requested by developer)
-  const handleWipeData = () => {
-    setModalConfig({
-      isOpen: true,
-      title: "Limpar Todo o Sistema!",
-      message: "Tem certeza de que deseja LIMPAR COMPLETAMENTE todos os coordenadores e líderes do sistema? Esta ação deixará o banco de dados vazio para que você possa iniciar cadastros do zero absoluto.",
-      variant: "danger",
-      onConfirm: () => {
-        setCoordenadoresRegionais([]);
-        setLiderancas([]);
-        setEleitores([]);
-        localStorage.removeItem("geoscan_coordenadores");
-        localStorage.removeItem("geoscan_liderancas");
-        localStorage.removeItem("geoscan_eleitores");
-        setModalConfig((prev) => ({ ...prev, isOpen: false }));
-        showToast("Sistema de base limpo com sucesso!");
-      }
-    });
-  };
 
   // Creation logic for Coordenadores Regionais
   const handleAddCoordenador = (coordData: Omit<CoordenadorRegional, "id" | "createdAt">) => {
@@ -436,22 +400,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleWipeData}
-              id="btn-wipe-data-header"
-              className="px-4 py-2 bg-red-950/40 hover:bg-red-900/40 border border-red-500/30 hover:border-red-500/50 text-red-300 rounded-lg text-xs font-bold uppercase tracking-wider transition shrink-0 cursor-pointer"
-              title="Limpar todos os líderes para testes do zero"
-            >
-              🧹 Limpar Sistema
-            </button>
-            <button
-              onClick={handleResetToMocks}
-              id="btn-restore-mocks-header"
-              className="px-4 py-2 bg-slate-950/60 hover:bg-slate-950/90 border border-slate-850 hover:border-slate-800 text-slate-300 hover:text-white rounded-lg text-xs font-bold uppercase tracking-wider transition shrink-0 cursor-pointer"
-              title="Carrega os dados fictícios do Amapá para demonstração rápida"
-            >
-              📊 Carregar Exemplo
-            </button>
             <div className="flex items-center gap-1.5 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-3 py-1.5 rounded-full font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>Sincronia Ativa</span>
@@ -523,22 +471,6 @@ export default function App() {
         {/* BOTTOM TELEMETRY BAR ON HIGH DENSITY OR SMALL DEVICES */}
         <footer className="bg-slate-900/30 border-t border-slate-850/60 py-2.5 px-4 h-12 flex lg:hidden items-center justify-between text-xs text-slate-400 font-mono select-none">
           <span>AP COORDENAÇÃO © 2026</span>
-          <div className="flex gap-4">
-            <button
-              onClick={handleWipeData}
-              id="btn-wipe-data-footer"
-              className="text-red-400 hover:underline font-bold"
-            >
-              Limpar Sistema
-            </button>
-            <button
-              onClick={handleResetToMocks}
-              id="btn-restore-mocks-footer"
-              className="text-emerald-450 hover:underline hover:text-emerald-400 font-bold"
-            >
-              Carregar Exemplo
-            </button>
-          </div>
         </footer>
 
       </main>
