@@ -448,7 +448,7 @@ export default function CadastrosTab({
               </span>
             </div>
             <div>
-              <h4 className="font-extrabold text-sm text-slate-200">Eleitores Finais</h4>
+              <h4 className="font-extrabold text-sm text-slate-200">Apoiadores/Eleitores Finais</h4>
               <p className="text-[11.5px] text-slate-400 mt-0.5 leading-snug">Zonas eleitorais e votos confirmados.</p>
             </div>
           </button>
@@ -1354,7 +1354,7 @@ export default function CadastrosTab({
                   <div className="flex flex-col text-[11px] text-slate-400 font-mono space-y-1">
                     <p>&bull; Coordenador Regional</p>
                     <p>&bull; Liderança focal</p>
-                    <p>&bull; Eleitores finais</p>
+                    <p>&bull; Apoiadores/Eleitores finais</p>
                   </div>
                 </div>
 
@@ -1362,7 +1362,7 @@ export default function CadastrosTab({
                   type="button"
                   onClick={() => {
                     const u = `${window.location.origin}${window.location.pathname}?coordId=${sharingCoord.id}&coordNome=${encodeURIComponent(sharingCoord.nome)}&municipio=${encodeURIComponent(sharingCoord.municipio)}${coordinatorWhatsapp ? `&coordWhatsapp=${encodeURIComponent(coordinatorWhatsapp)}` : ""}`;
-                    const msg = `Olá, *${sharingCoord.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro.\n\nDados do vínculo seguindo esta ordem: Coordenador Regional, Liderança Focal e Eleitores finais.\n\n🔗 *Link:* ${u}`;
+                    const msg = `Olá, *${sharingCoord.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro.\n\nDados do vínculo seguindo esta ordem: Coordenador Regional, Liderança Focal e Apoiadores/Eleitores finais.\n\n🔗 *Link:* ${u}`;
                     
                     let phoneParam = "";
                     if (sharingCoord.telefone) {
@@ -1456,7 +1456,7 @@ export default function CadastrosTab({
                   <div className="flex flex-col text-[11px] text-slate-400 font-mono space-y-1">
                     <p>&bull; Coordenador Regional</p>
                     <p>&bull; Liderança focal</p>
-                    <p>&bull; Eleitores finais</p>
+                    <p>&bull; Apoiadores/Eleitores finais</p>
                   </div>
                 </div>
 
@@ -1464,7 +1464,7 @@ export default function CadastrosTab({
                   type="button"
                   onClick={() => {
                     const u = `${window.location.origin}${window.location.pathname}?liderId=${sharingLider.id}&liderNome=${encodeURIComponent(sharingLider.nome)}&municipio=${encodeURIComponent(sharingLider.municipio)}${sharingLider.telefone ? `&liderWhatsapp=${encodeURIComponent(sharingLider.telefone)}` : ""}`;
-                    const msg = `Olá, *${sharingLider.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro (Etapa 3).\n\nDados do vínculo seguindo esta ordem: Coordenador Regional, Liderança Focal e Eleitores finais.\n\n🔗 *Link:* ${u}`;
+                    const msg = `Olá, *${sharingLider.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro (Etapa 3).\n\nDados do vínculo seguindo esta ordem: Coordenador Regional, Liderança Focal e Apoiadores/Eleitores finais.\n\n🔗 *Link:* ${u}`;
                     
                     let phoneParam = "";
                     if (sharingLider.telefone) {

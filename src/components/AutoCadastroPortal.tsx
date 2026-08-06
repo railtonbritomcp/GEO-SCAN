@@ -334,8 +334,7 @@ _Registrado em ${formattedDate} via GEO SCAN Auto-Cadastro_`;
               </div>
               <p className="font-sans text-[10px] text-slate-500 uppercase font-black tracking-wider mb-1">Dados do vínculo seguindo esta ordem:</p>
               <p>&bull; Liderança focal</p>
-              <p>&bull; Apoiadores</p>
-              <p>&bull; Eleitores finais</p>
+              <p>&bull; Apoiadores/Eleitores finais</p>
             </div>
 
             <div className="space-y-3 pt-2">
