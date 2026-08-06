@@ -254,82 +254,85 @@ export default function DashboardTab({
 
     const candidateName = candidateInfo?.candidateName || "Não Ativado";
     const ballotNumber = candidateInfo?.ballotNumber || "---";
+    const adminName = candidateInfo?.adminCoordinatorName || "Não Informado";
     const timestampStr = new Date().toLocaleString("pt-BR");
 
-    // Corporate Header of GEO SCAN Amapá
+    // Corporate Header of GEO SCAN
     doc.setFillColor(15, 23, 42); // slate-900
     doc.rect(0, 0, 210, 42, "F");
 
     // Title
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text("GEO SCAN | Inteligência Territorial", 14, 16);
+    doc.setFontSize(18);
+    doc.text("GEO SCAN | Inteligência Territorial", 14, 15);
 
     // Subtitle
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(148, 163, 184); // slate-400
-    doc.text("SISTEMA DE MONITORAMENTO DE CAMPANHA ELEITORAL", 14, 23);
+    doc.text("SISTEMA DE MONITORAMENTO DE CAMPANHA ELEITORAL", 14, 21);
 
     // Golden / Emerald bar
     doc.setFillColor(16, 185, 129); // emerald-500
-    doc.rect(14, 26, 182, 1, "F");
+    doc.rect(14, 24, 182, 1, "F");
 
     // Candidate details
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(`Candidato: ${candidateName.toUpperCase()} (Nº ${ballotNumber})`, 14, 34);
+    doc.text(`Candidato: ${candidateName.toUpperCase()} (Nº ${ballotNumber})`, 14, 32);
+    doc.text(`Administrador: ${adminName.toUpperCase()}`, 14, 37);
 
     // Extraction Date
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(203, 213, 225); // slate-300
-    doc.text(`Emissão: ${timestampStr} | UF: Amapá (AP)`, 145, 34);
+    doc.text(`Emissão: ${timestampStr}`, 140, 32);
+    doc.text(`UF: Amapá (AP)`, 140, 37);
 
-    let currentY = 52;
+    let currentY = 48;
 
-    // Filters Summary Panel in PDF
+    // Helper to check page bounds and auto-insert page break safely
+    const checkSpace = (neededHeight: number) => {
+      if (currentY + neededHeight > 275) {
+        doc.addPage();
+        currentY = 20;
+      }
+    };
+
+    // 1. FILTERS SUMMARY PANEL
     doc.setFillColor(248, 250, 252); // slate-50
     doc.setDrawColor(226, 232, 240); // slate-200
-    doc.rect(14, currentY, 182, 38, "FD");
+    doc.rect(14, currentY, 182, 34, "FD");
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42); // slate-900
-    doc.text("DELIMITAÇÃO TERRITORIAL E RESPONSÁVEIS (FILTRO SELECIONADO)", 18, currentY + 5);
+    doc.text("DELIMITAÇÃO TERRITORIAL E RESPONSÁVEIS (FILTRO ATUAL SELECIONADO)", 18, currentY + 5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105); // slate-600
-    doc.text(`Municipio: ${filterMunicipio === "ALL" ? "TODOS OS MUNICÍPIOS" : filterMunicipio.toUpperCase()}`, 18, currentY + 11);
+    doc.text(`Município: ${filterMunicipio === "ALL" ? "TODOS OS MUNICÍPIOS" : filterMunicipio.toUpperCase()}`, 18, currentY + 11);
     doc.text(`Liderança Focal: ${filterLider === "ALL" ? "TODAS AS LIDERANÇAS FOCAIS" : (metrics.activeLeaders.find(l => l.id === filterLider)?.nome.toUpperCase() || "SELECIONADA")}`, 18, currentY + 16);
     
-    // Active Coordenadores Regionais
     const activeCoordIds = new Set(metrics.activeLeaders.map(l => l.coordenadorRegionalId).filter(id => !!id));
     const activeCoords = coordenadoresRegionais.filter(c => activeCoordIds.has(c.id));
-    const coordNames = activeCoords.length > 0 ? activeCoords.map(c => c.nome).join(", ") : "NENHUM COORDENADOR VINCULADO";
-    doc.text(`Coordenadores Regionais: ${coordNames.toUpperCase()}`, 18, currentY + 21);
-    doc.text(`Data Extracao: ${timestampStr}`, 18, currentY + 26);
-    doc.text(`Meta Estadual Geral: ${globalGoal} votos`, 18, currentY + 31);
+    const coordNames = activeCoords.length > 0 ? activeCoords.map(c => c.nome).join(", ") : "NENHUM COORDENADOR VINCULADO NO FILTRO";
+    doc.text(`Coordenadores Regionais no Filtro: ${coordNames.toUpperCase()}`, 18, currentY + 21);
+    doc.text(`Meta Estadual Geral (Meta Global): ${globalGoal} votos`, 18, currentY + 26);
+    doc.text(`Data e Hora da Extração: ${timestampStr}`, 18, currentY + 31);
     
-    // Overview Stats
-    currentY += 40; // Shifted overview stats below the now-taller filter box
+    currentY += 39;
 
+    // Overview Stats Metrics Cards
     const totLeaders = metrics.activeLeaders.length;
     const totSupporters = metrics.activeEleitores.length;
     const totalMacro = metrics.metaLiderTotal;
     const totalMicro = metrics.votosGantidosTotal;
     const progressPercent = metrics.progressoMetaPct;
 
-    doc.setFont("helvetica", "bold");
-    doc.text(`Lideranças Focais Ativas: ${totLeaders}`, 14, currentY); // Repositioned
-    doc.text(`Eleitores Cadastrados: ${totSupporters}`, 14, currentY + 5);
-    currentY += 10;
-
-
-    // Compilated metrics cards (Draw two boxes)
     // Box 1: Meta Macro do Filtro
     doc.setFillColor(241, 245, 249); // slate-100
     doc.rect(14, currentY, 88, 14, "F");
@@ -338,7 +341,7 @@ export default function DashboardTab({
     doc.setTextColor(71, 85, 105);
     doc.text("META MACRO PACTUADA (Filtro)", 18, currentY + 4);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
     doc.text(`${totalMacro} votos`, 18, currentY + 10);
 
@@ -348,123 +351,253 @@ export default function DashboardTab({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(71, 85, 105);
-    doc.text("COMPROMISSO GARANTIDO (Eleitores e Lideranças)", 112, currentY + 4);
+    doc.text("COMPROMISSO GARANTIDO (Apoiadores e Lideranças)", 112, currentY + 4);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.setTextColor(16, 185, 129); // emerald-500
     doc.text(`${totalMicro} votos (${progressPercent}%)`, 112, currentY + 10);
 
     currentY += 20;
 
-    // Heading for cascading data
+    // 2. TABELA DE MUNICÍPIOS CADASTRADOS COM REGISTROS
+    checkSpace(35);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.5);
+    doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
-    doc.text("MAPEAMENTO EM CASCATA (UF -> MUNICÍPIO -> COORDENADOR -> LIDERANÇA FOCAL -> ELEITORES)", 14, currentY);
-    currentY += 5;
-
+    doc.text("1. MUNICÍPIOS CADASTRADOS COM REGISTROS NA CAMPANHA", 14, currentY);
+    currentY += 4;
     doc.setDrawColor(203, 213, 225); // slate-300
     doc.line(14, currentY, 196, currentY);
-    currentY += 8;
+    currentY += 4;
 
-    // Table Generation based on requested order: Municipio -> Lideranca Focal -> Apoiador -> Eleitor
-    const tableBody: any[] = [];
-    
-    // Sort logic to maintain cascading order in the flat table
-    const sortedLeaders = [...metrics.activeLeaders].sort((a, b) => {
-      // Sort by Municipality first
-      if (a.municipio !== b.municipio) return a.municipio.localeCompare(b.municipio);
+    // Group records by municipality to summarize
+    const munNamesWithRecords = Array.from(new Set([
+      ...coordenadoresRegionais.map(c => c.municipio),
+      ...liderancas.map(l => l.municipio),
+      ...eleitores.map(e => {
+        const l = liderancas.find(lid => lid.id === e.liderancaId);
+        return l ? l.municipio : "";
+      })
+    ])).filter(Boolean).sort();
+
+    const munTableBody = munNamesWithRecords.map((m) => {
+      const isFiltered = filterMunicipio !== "ALL" && filterMunicipio !== m;
+      const statusText = isFiltered ? "Inativo no Filtro" : "Ativo no Filtro";
       
-      // Then by Focal Leader (Coordenador)
-      const coordA = (coordenadoresRegionais.find(c => c.id === a.coordenadorRegionalId)?.nome || "ZZZ").toUpperCase();
-      const coordB = (coordenadoresRegionais.find(c => c.id === b.coordenadorRegionalId)?.nome || "ZZZ").toUpperCase();
-      if (coordA !== coordB) return coordA.localeCompare(coordB);
-      
-      // Finally by Apoiador (Lideranca)
-      return a.nome.localeCompare(b.nome);
+      const coordsCount = coordenadoresRegionais.filter(c => c.municipio === m).length;
+      const leadersCount = liderancas.filter(l => l.municipio === m).length;
+      const supportersCount = eleitores.filter(e => {
+        const l = liderancas.find(lid => lid.id === e.liderancaId);
+        return l && l.municipio === m;
+      }).length;
+
+      const munDef = municipios.find(mu => mu.nome === m);
+      const metaMun = munDef?.metaVotos || 0;
+      const totalCommitted = leadersCount + supportersCount; // Each leader represents their own committed vote
+
+      return [
+        m.toUpperCase(),
+        metaMun > 0 ? `${metaMun} votos` : "Sem meta individual",
+        coordsCount.toString(),
+        leadersCount.toString(),
+        supportersCount.toString(),
+        `${totalCommitted} votos`,
+        statusText
+      ];
     });
 
-    sortedLeaders.forEach((lid) => {
-      const muni = lid.municipio.toUpperCase();
-      const bairro = lid.bairro.toUpperCase();
-      const coordMatch = coordenadoresRegionais.find((c) => c.id === lid.coordenadorRegionalId);
-      const focal = coordMatch ? coordMatch.nome.toUpperCase() : "NÃO VINCULADO";
-      const apoiador = lid.nome.toUpperCase();
-      
-      const leaderVoters = metrics.activeEleitores.filter((e) => e.liderancaId === lid.id);
-      
-      if (leaderVoters.length === 0) {
-        // Even without voters, the Leader counts as a committed vote
-        tableBody.push([
-          muni,
-          bairro,
-          focal,
-          apoiador,
-          "(Voto Próprio da Liderança)",
-          lid.telefone || "N/A"
-        ]);
-      } else {
-        leaderVoters.forEach((v) => {
-          tableBody.push([
-            muni,
-            bairro,
-            focal,
-            apoiador,
-            v.nome.toUpperCase(),
-            v.telefone || "N/A"
-          ]);
-        });
-      }
-    });
-
-    if (tableBody.length === 0) {
+    if (munTableBody.length === 0) {
       doc.setFont("helvetica", "italic");
-      doc.setFontSize(9);
+      doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text("Nenhum dado encontrado com os filtros ativos para gerar a tabela.", 14, currentY);
+      doc.text("Nenhum município cadastrado com registros até o momento.", 14, currentY);
+      currentY += 8;
     } else {
       autoTable(doc, {
         startY: currentY,
-        head: [["MUNICÍPIO", "BAIRRO", "COORDENADOR REGIONAL", "LIDERANÇA FOCAL", "ELEITOR CADASTRADO", "CONTATO"]],
-        body: tableBody,
+        head: [["MUNICÍPIO", "META DO MUNICÍPIO", "COORDENADORES", "LIDERANÇAS FOCAIS", "APOIADORES", "VOTOS GARANTIDOS", "STATUS DO FILTRO"]],
+        body: munTableBody,
         theme: "striped",
-        styles: { fontSize: 6.5, cellPadding: 1.2 },
-        headStyles: { 
-          fillColor: [15, 23, 42], 
-          textColor: [255, 255, 255], 
-          fontStyle: "bold",
-          halign: "left"
-        },
-        columnStyles: {
-          0: { cellWidth: 24 },
-          1: { cellWidth: 24 },
-          2: { cellWidth: 34 },
-          3: { cellWidth: 34 },
-          4: { cellWidth: 40 },
-          5: { cellWidth: 24 }
-        },
+        styles: { fontSize: 6.5, cellPadding: 1.5 },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: "bold", halign: "left" },
         margin: { left: 14, right: 14 },
       });
+      currentY = (doc as any).lastAutoTable?.finalY + 12 || currentY + 20;
     }
 
-    currentY = (doc as any).lastAutoTable?.finalY + 15 || currentY + 20;
+    // 3. TABELA DE COORDENADORES E SUAS METAS
+    checkSpace(35);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text("2. COORDENADORES REGIONAIS E SUAS METAS", 14, currentY);
+    currentY += 4;
+    doc.line(14, currentY, 196, currentY);
+    currentY += 4;
 
-    // Header and footers on all pages
+    let coordsToShow = coordenadoresRegionais;
+    if (filterMunicipio !== "ALL") {
+      coordsToShow = coordsToShow.filter(c => c.municipio === filterMunicipio);
+    }
+    if (filterLider !== "ALL") {
+      const selLeader = liderancas.find(l => l.id === filterLider);
+      if (selLeader) {
+        coordsToShow = coordsToShow.filter(c => c.id === selLeader.coordenadorRegionalId);
+      }
+    }
+
+    const coordsTableBody = coordsToShow.map((c) => {
+      const metaText = c.metaVotos ? `${c.metaVotos} votos` : "Opcional / Não definida";
+      return [
+        c.nome.toUpperCase(),
+        c.municipio.toUpperCase(),
+        c.bairro ? c.bairro.toUpperCase() : "N/A",
+        c.telefone || "N/A",
+        metaText
+      ];
+    });
+
+    if (coordsTableBody.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Nenhum coordenador regional localizado para os filtros ativos.", 14, currentY);
+      currentY += 8;
+    } else {
+      autoTable(doc, {
+        startY: currentY,
+        head: [["COORDENADOR REGIONAL", "MUNICÍPIO", "BAIRRO", "CONTATO (TELEFONE)", "META DE VOTOS"]],
+        body: coordsTableBody,
+        theme: "striped",
+        styles: { fontSize: 6.5, cellPadding: 1.5 },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: "bold", halign: "left" },
+        margin: { left: 14, right: 14 },
+      });
+      currentY = (doc as any).lastAutoTable?.finalY + 12 || currentY + 20;
+    }
+
+    // 4. TABELA DE LIDERANÇAS FOCAIS E SUAS METAS
+    checkSpace(35);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text("3. LIDERANÇAS FOCAIS E SUAS METAS", 14, currentY);
+    currentY += 4;
+    doc.line(14, currentY, 196, currentY);
+    currentY += 4;
+
+    let leadersToShow = liderancas;
+    if (filterMunicipio !== "ALL") {
+      leadersToShow = leadersToShow.filter(l => l.municipio === filterMunicipio);
+    }
+    if (filterLider !== "ALL") {
+      leadersToShow = leadersToShow.filter(l => l.id === filterLider);
+    }
+
+    const leadersTableBody = leadersToShow.map((l) => {
+      const coord = coordenadoresRegionais.find(c => c.id === l.coordenadorRegionalId);
+      const coordName = coord ? coord.nome.toUpperCase() : "NÃO VINCULADO";
+      const lEleitores = eleitores.filter(e => e.liderancaId === l.id);
+      const totalMicroCount = lEleitores.length + 1;
+      const metaMacroVal = l.calculoMeta === "eleitor" ? totalMicroCount : l.metaMacro;
+
+      return [
+        l.nome.toUpperCase(),
+        coordName,
+        l.municipio.toUpperCase(),
+        l.bairro.toUpperCase(),
+        l.telefone || "N/A",
+        `${metaMacroVal} votos`,
+        l.calculoMeta === "eleitor" ? "Calculado (Eleitores + 1)" : "Fixo (Meta Macro)"
+      ];
+    });
+
+    if (leadersTableBody.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Nenhuma liderança focal localizada para os filtros ativos.", 14, currentY);
+      currentY += 8;
+    } else {
+      autoTable(doc, {
+        startY: currentY,
+        head: [["LIDERANÇA FOCAL", "COORDENADOR VINCULADO", "MUNICÍPIO", "BAIRRO", "TELEFONE", "META DE VOTOS", "MÉTODO DE CÁLCULO"]],
+        body: leadersTableBody,
+        theme: "striped",
+        styles: { fontSize: 6.5, cellPadding: 1.5 },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: "bold", halign: "left" },
+        margin: { left: 14, right: 14 },
+      });
+      currentY = (doc as any).lastAutoTable?.finalY + 12 || currentY + 20;
+    }
+
+    // 5. TABELA DE APOIADORES/ELEITORES FINAIS
+    checkSpace(35);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text("4. APOIADORES / ELEITORES FINAIS CADASTRADOS", 14, currentY);
+    currentY += 4;
+    doc.line(14, currentY, 196, currentY);
+    currentY += 4;
+
+    const activeLeaderIds = new Set(leadersToShow.map(l => l.id));
+    const eleitoresToShow = eleitores.filter(e => activeLeaderIds.has(e.liderancaId));
+
+    const eleitoresTableBody = eleitoresToShow.map((e) => {
+      const leader = liderancas.find(l => l.id === e.liderancaId);
+      const leaderName = leader ? leader.nome.toUpperCase() : "N/A";
+      const muni = leader ? leader.municipio.toUpperCase() : "N/A";
+      const bairro = leader ? leader.bairro.toUpperCase() : "N/A";
+      const coord = leader ? coordenadoresRegionais.find(c => c.id === leader.coordenadorRegionalId) : null;
+      const coordName = coord ? coord.nome.toUpperCase() : "N/A";
+
+      return [
+        e.nome.toUpperCase(),
+        leaderName,
+        coordName,
+        `${muni} - ${bairro}`,
+        e.zonaEleitoral || "N/A",
+        e.telefone || "N/A"
+      ];
+    });
+
+    if (eleitoresTableBody.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Nenhum apoiador / eleitor final localizado para os filtros ativos.", 14, currentY);
+      currentY += 8;
+    } else {
+      autoTable(doc, {
+        startY: currentY,
+        head: [["APOIADOR / ELEITOR FINAL", "LIDERANÇA FOCAL VINCULADA", "COORDENADOR REGIONAL", "MUNICÍPIO - BAIRRO", "ZONA ELEITORAL", "CONTATO"]],
+        body: eleitoresTableBody,
+        theme: "striped",
+        styles: { fontSize: 6.5, cellPadding: 1.5 },
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: "bold", halign: "left" },
+        margin: { left: 14, right: 14 },
+      });
+      currentY = (doc as any).lastAutoTable?.finalY + 12 || currentY + 20;
+    }
+
+    // Add Header and Footers on all pages
     const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
       doc.setTextColor(148, 163, 184);
-      // Footer text
+      
+      // Footer Text
       const footerText = `GEO SCAN | Inteligência Territorial — Página ${i} de ${pageCount}`;
       doc.text(footerText, 14, 287);
       
-      const watermarkText = "CONFIDENCIAL — MONITORAMENTO INTERNO";
+      const watermarkText = "CONFIDENCIAL — MONITORAMENTO INTERNO DE CAMPANHA";
       doc.text(watermarkText, 210 - 14 - doc.getTextWidth(watermarkText), 287);
     }
 
-    // Save filename
+    // Save PDF
     const dateFormatted = new Date().toISOString().split("T")[0];
     const cleanCandidate = candidateName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_").toLowerCase();
     const cleanMun = filterMunicipio.replace(/\s+/g, "_").toLowerCase();
