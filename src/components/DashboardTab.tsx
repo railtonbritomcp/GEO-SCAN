@@ -114,21 +114,112 @@ export default function DashboardTab({
 
   // FILTERS STATE
   const [filterMunicipio, setFilterMunicipio] = useState<string>("ALL");
+  const [filterCoordenador, setFilterCoordenador] = useState<string>("ALL");
   const [filterLider, setFilterLider] = useState<string>("ALL");
+  const [filterEleitor, setFilterEleitor] = useState<string>("ALL");
 
-  // Reset Leader filter when Municipality filter changes
+  // Reset dependent filters in cascade when higher filter levels change
   const handleMunicipioFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilterMunicipio(e.target.value);
-    setFilterLider("ALL"); // Reset leader filter
+    setFilterCoordenador("ALL");
+    setFilterLider("ALL");
+    setFilterEleitor("ALL");
   };
 
-  // Dynamically filter leaders shown in the dropdown selector based on selected Municipality
-  const availableLeadersInFilter = useMemo(() => {
-    if (filterMunicipio === "ALL") {
-      return liderancas;
+  const handleCoordenadorFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setFilterCoordenador(val);
+    setFilterLider("ALL");
+    setFilterEleitor("ALL");
+    
+    // Auto-align Municipio if set to specific coordinator and municipio was ALL
+    if (val !== "ALL") {
+      const coord = coordenadoresRegionais.find((c) => c.id === val);
+      if (coord && filterMunicipio === "ALL") {
+        setFilterMunicipio(coord.municipio);
+      }
     }
-    return liderancas.filter((l) => l.municipio === filterMunicipio);
-  }, [filterMunicipio, liderancas]);
+  };
+
+  const handleLiderFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setFilterLider(val);
+    setFilterEleitor("ALL");
+
+    // Auto-align higher levels if we set a specific leader and those were ALL
+    if (val !== "ALL") {
+      const leader = liderancas.find((l) => l.id === val);
+      if (leader) {
+        if (filterMunicipio === "ALL") {
+          setFilterMunicipio(leader.municipio);
+        }
+        if (filterCoordenador === "ALL" && leader.coordenadorRegionalId) {
+          setFilterCoordenador(leader.coordenadorRegionalId);
+        }
+      }
+    }
+  };
+
+  const handleEleitorFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setFilterEleitor(val);
+
+    // Auto-align higher levels if we set a specific supporter and those were ALL
+    if (val !== "ALL") {
+      const el = eleitores.find((e) => e.id === val);
+      if (el) {
+        const leader = liderancas.find((l) => l.id === el.liderancaId);
+        if (leader) {
+          if (filterMunicipio === "ALL") {
+            setFilterMunicipio(leader.municipio);
+          }
+          if (filterCoordenador === "ALL" && leader.coordenadorRegionalId) {
+            setFilterCoordenador(leader.coordenadorRegionalId);
+          }
+          if (filterLider === "ALL") {
+            setFilterLider(leader.id);
+          }
+        }
+      }
+    }
+  };
+
+  // Dynamically filter coordinators shown in dropdown based on selected Municipio
+  const availableCoordenadoresInFilter = useMemo(() => {
+    if (filterMunicipio === "ALL") {
+      return coordenadoresRegionais;
+    }
+    return coordenadoresRegionais.filter((c) => c.municipio === filterMunicipio);
+  }, [filterMunicipio, coordenadoresRegionais]);
+
+  // Dynamically filter leaders shown in the dropdown selector based on selected Municipality and Coordinator
+  const availableLeadersInFilter = useMemo(() => {
+    let list = liderancas;
+    if (filterMunicipio !== "ALL") {
+      list = list.filter((l) => l.municipio === filterMunicipio);
+    }
+    if (filterCoordenador !== "ALL") {
+      list = list.filter((l) => l.coordenadorRegionalId === filterCoordenador);
+    }
+    return list;
+  }, [filterMunicipio, filterCoordenador, liderancas]);
+
+  // Dynamically filter supporters (eleitores) shown in the dropdown based on selected Municipality, Coordinator, and Leader
+  const availableEleitoresInFilter = useMemo(() => {
+    let list = eleitores;
+    if (filterLider !== "ALL") {
+      return list.filter((e) => e.liderancaId === filterLider);
+    }
+    if (filterCoordenador !== "ALL") {
+      const leaderIdsOfCoord = new Set(liderancas.filter(l => l.coordenadorRegionalId === filterCoordenador).map(l => l.id));
+      list = list.filter((e) => leaderIdsOfCoord.has(e.liderancaId));
+    }
+    if (filterMunicipio !== "ALL") {
+      const leaderIdsOfMun = new Set(liderancas.filter(l => l.municipio === filterMunicipio).map(l => l.id));
+      list = list.filter((e) => leaderIdsOfMun.has(e.liderancaId));
+    }
+    return list;
+  }, [filterMunicipio, filterCoordenador, filterLider, liderancas, eleitores]);
 
   // CALCULATION RESULTS based on filters
   const metrics = useMemo(() => {
@@ -137,13 +228,28 @@ export default function DashboardTab({
     if (filterMunicipio !== "ALL") {
       activeLeaders = activeLeaders.filter((l) => l.municipio === filterMunicipio);
     }
+    if (filterCoordenador !== "ALL") {
+      activeLeaders = activeLeaders.filter((l) => l.coordenadorRegionalId === filterCoordenador);
+    }
     if (filterLider !== "ALL") {
       activeLeaders = activeLeaders.filter((l) => l.id === filterLider);
+    }
+    // If a specific eleitor is selected, make sure that leader is active!
+    if (filterEleitor !== "ALL") {
+      const targetEl = eleitores.find(e => e.id === filterEleitor);
+      if (targetEl) {
+        activeLeaders = activeLeaders.filter((l) => l.id === targetEl.liderancaId);
+      } else {
+        activeLeaders = [];
+      }
     }
 
     // Sum of Macro Goals for filtered leaders, taking care of Lider vs Eleitor setup setting
     const metaLiderTotal = activeLeaders.reduce((sum, l) => {
       if (l.calculoMeta === "eleitor") {
+        if (filterEleitor !== "ALL") {
+          return sum + 2; // Selected supporter + leader himself
+        }
         const leaderEleitoresSum = eleitores
           .filter((el) => el.liderancaId === l.id).length + 1; // Each leadership counts as a voter with 1 personal vote
         return sum + leaderEleitoresSum;
@@ -152,9 +258,12 @@ export default function DashboardTab({
     }, 0);
 
     // 2. Filtered Eleitores
-    // Eleitores are linked to the filtered leaders
     const filteredLeaderIds = new Set(activeLeaders.map((l) => l.id));
-    const activeEleitores = eleitores.filter((el) => filteredLeaderIds.has(el.liderancaId));
+    let activeEleitores = eleitores.filter((el) => filteredLeaderIds.has(el.liderancaId));
+    
+    if (filterEleitor !== "ALL") {
+      activeEleitores = activeEleitores.filter((el) => el.id === filterEleitor);
+    }
 
     // Sum of eleitores plus 1 personal vote for each active leader
     const votosGantidosTotal = activeEleitores.length + activeLeaders.length;
@@ -169,7 +278,7 @@ export default function DashboardTab({
       votosGantidosTotal,
       progressoMetaPct: Math.round(progressoMetaPct * 10) / 10, // 1 decimal place
     };
-  }, [filterMunicipio, filterLider, liderancas, eleitores]);
+  }, [filterMunicipio, filterCoordenador, filterLider, filterEleitor, liderancas, eleitores]);
 
   // Aggregate results by neighborhood for visual breakdown
   const neighborhoodBreakdown = useMemo(() => {
@@ -304,7 +413,7 @@ export default function DashboardTab({
     // 1. FILTERS SUMMARY PANEL
     doc.setFillColor(248, 250, 252); // slate-50
     doc.setDrawColor(226, 232, 240); // slate-200
-    doc.rect(14, currentY, 182, 34, "FD");
+    doc.rect(14, currentY, 182, 42, "FD");
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.5);
@@ -314,17 +423,27 @@ export default function DashboardTab({
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105); // slate-600
+    
+    const coordNameText = filterCoordenador === "ALL" 
+      ? "TODOS OS COORDENADORES" 
+      : (coordenadoresRegionais.find(c => c.id === filterCoordenador)?.nome.toUpperCase() || "SELECIONADO");
+      
+    const leaderNameText = filterLider === "ALL" 
+      ? "TODAS AS LIDERANÇAS FOCAIS" 
+      : (metrics.activeLeaders.find(l => l.id === filterLider)?.nome.toUpperCase() || "SELECIONADA");
+      
+    const eleitorNameText = filterEleitor === "ALL" 
+      ? "TODOS OS APOIADORES / ELEITORES FINAIS" 
+      : (eleitores.find(e => e.id === filterEleitor)?.nome.toUpperCase() || "SELECIONADO");
+
     doc.text(`Município: ${filterMunicipio === "ALL" ? "TODOS OS MUNICÍPIOS" : filterMunicipio.toUpperCase()}`, 18, currentY + 11);
-    doc.text(`Liderança Focal: ${filterLider === "ALL" ? "TODAS AS LIDERANÇAS FOCAIS" : (metrics.activeLeaders.find(l => l.id === filterLider)?.nome.toUpperCase() || "SELECIONADA")}`, 18, currentY + 16);
+    doc.text(`Coordenador Regional: ${coordNameText}`, 18, currentY + 16);
+    doc.text(`Liderança Focal: ${leaderNameText}`, 18, currentY + 21);
+    doc.text(`Apoiador / Eleitor Final: ${eleitorNameText}`, 18, currentY + 26);
+    doc.text(`Meta Estadual Geral (Meta Global): ${globalGoal} votos`, 18, currentY + 31);
+    doc.text(`Data e Hora da Extração: ${timestampStr}`, 18, currentY + 36);
     
-    const activeCoordIds = new Set(metrics.activeLeaders.map(l => l.coordenadorRegionalId).filter(id => !!id));
-    const activeCoords = coordenadoresRegionais.filter(c => activeCoordIds.has(c.id));
-    const coordNames = activeCoords.length > 0 ? activeCoords.map(c => c.nome).join(", ") : "NENHUM COORDENADOR VINCULADO NO FILTRO";
-    doc.text(`Coordenadores Regionais no Filtro: ${coordNames.toUpperCase()}`, 18, currentY + 21);
-    doc.text(`Meta Estadual Geral (Meta Global): ${globalGoal} votos`, 18, currentY + 26);
-    doc.text(`Data e Hora da Extração: ${timestampStr}`, 18, currentY + 31);
-    
-    currentY += 39;
+    currentY += 47;
 
     // Overview Stats Metrics Cards
     const totLeaders = metrics.activeLeaders.length;
@@ -439,10 +558,28 @@ export default function DashboardTab({
     if (filterMunicipio !== "ALL") {
       coordsToShow = coordsToShow.filter(c => c.municipio === filterMunicipio);
     }
+    if (filterCoordenador !== "ALL") {
+      coordsToShow = coordsToShow.filter(c => c.id === filterCoordenador);
+    }
     if (filterLider !== "ALL") {
       const selLeader = liderancas.find(l => l.id === filterLider);
       if (selLeader) {
         coordsToShow = coordsToShow.filter(c => c.id === selLeader.coordenadorRegionalId);
+      } else {
+        coordsToShow = [];
+      }
+    }
+    if (filterEleitor !== "ALL") {
+      const selEl = eleitores.find(e => e.id === filterEleitor);
+      if (selEl) {
+        const selLeader = liderancas.find(l => l.id === selEl.liderancaId);
+        if (selLeader) {
+          coordsToShow = coordsToShow.filter(c => c.id === selLeader.coordenadorRegionalId);
+        } else {
+          coordsToShow = [];
+        }
+      } else {
+        coordsToShow = [];
       }
     }
 
@@ -490,8 +627,19 @@ export default function DashboardTab({
     if (filterMunicipio !== "ALL") {
       leadersToShow = leadersToShow.filter(l => l.municipio === filterMunicipio);
     }
+    if (filterCoordenador !== "ALL") {
+      leadersToShow = leadersToShow.filter(l => l.coordenadorRegionalId === filterCoordenador);
+    }
     if (filterLider !== "ALL") {
       leadersToShow = leadersToShow.filter(l => l.id === filterLider);
+    }
+    if (filterEleitor !== "ALL") {
+      const targetEl = eleitores.find(e => e.id === filterEleitor);
+      if (targetEl) {
+        leadersToShow = leadersToShow.filter(l => l.id === targetEl.liderancaId);
+      } else {
+        leadersToShow = [];
+      }
     }
 
     const leadersTableBody = leadersToShow.map((l) => {
@@ -542,7 +690,10 @@ export default function DashboardTab({
     currentY += 4;
 
     const activeLeaderIds = new Set(leadersToShow.map(l => l.id));
-    const eleitoresToShow = eleitores.filter(e => activeLeaderIds.has(e.liderancaId));
+    let eleitoresToShow = eleitores.filter(e => activeLeaderIds.has(e.liderancaId));
+    if (filterEleitor !== "ALL") {
+      eleitoresToShow = eleitoresToShow.filter(e => e.id === filterEleitor);
+    }
 
     const eleitoresTableBody = eleitoresToShow.map((e) => {
       const leader = liderancas.find(l => l.id === e.liderancaId);
@@ -853,26 +1004,39 @@ export default function DashboardTab({
       
       {/* FILTER PANEL */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 md:p-6 shadow-sm" id="dashboard-filters">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="flex items-center gap-3">
-            <span className="p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-450">
-              <Filter className="w-5 h-5 text-emerald-400" />
-            </span>
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-slate-200">Isolamento Territorial</h3>
-              <p className="text-xs text-slate-450">Selecione os filtros em cascata para isolar os dados do monitoramento</p>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-450">
+                <Filter className="w-5 h-5 text-emerald-400" />
+              </span>
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-wider text-slate-200">Isolamento Territorial</h3>
+                <p className="text-xs text-slate-450">Selecione os filtros em cascata para isolar os dados do monitoramento</p>
+              </div>
             </div>
+
+            {/* BUTTON EXPORT PDF */}
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className="w-full md:w-auto bg-slate-950 hover:bg-slate-850 hover:text-emerald-400 border border-slate-800 hover:border-emerald-500/30 text-emerald-500 font-black px-5 py-2.5 h-[42px] rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0"
+              title="Exportar Relatório PDF com Base no Isomento Territorial Atual"
+            >
+              <FileDown className="w-4 h-4" />
+              <span>Exportar PDF</span>
+            </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* MUNICIPIO FILTER */}
-            <div className="flex flex-col gap-1.5 w-full sm:w-56">
-              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">Filtrar por Município</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">1. Filtrar por Município</span>
               <select
                 id="filter-select-municipio"
                 value={filterMunicipio}
                 onChange={handleMunicipioFilterChange}
-                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white outline-none transition cursor-pointer"
+                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-xs font-bold text-white outline-none transition cursor-pointer"
               >
                 <option value="ALL">📍 Todos os Municípios</option>
                 {municipios.map((m) => (
@@ -883,16 +1047,34 @@ export default function DashboardTab({
               </select>
             </div>
 
+            {/* COORDENADOR FILTER */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">2. Filtrar por Coordenador</span>
+              <select
+                id="filter-select-coordenador"
+                value={filterCoordenador}
+                onChange={handleCoordenadorFilterChange}
+                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-xs font-bold text-white outline-none transition cursor-pointer"
+              >
+                <option value="ALL">👥 Todos os Coordenadores</option>
+                {availableCoordenadoresInFilter.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome} ({c.municipio})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* LIDERANCA FILTER */}
-            <div className="flex flex-col gap-1.5 w-full sm:w-64">
-              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">Filtrar por Liderança Focal</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">3. Filtrar por Liderança</span>
               <select
                 id="filter-select-lider"
                 value={filterLider}
-                onChange={(e) => setFilterLider(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white outline-none transition cursor-pointer"
+                onChange={handleLiderFilterChange}
+                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-xs font-bold text-white outline-none transition cursor-pointer"
               >
-                <option value="ALL">👤 Todas as Lideranças Focais</option>
+                <option value="ALL">👤 Todas as Lideranças</option>
                 {availableLeadersInFilter.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.nome} ({l.bairro})
@@ -901,18 +1083,22 @@ export default function DashboardTab({
               </select>
             </div>
 
-            {/* BUTTON EXPORT PDF */}
-            <div className="flex flex-col gap-1.5 w-full sm:w-auto justify-end">
-              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono opacity-0 select-none hidden sm:inline">Relatório</span>
-              <button
-                type="button"
-                onClick={handleExportPDF}
-                className="w-full sm:w-auto bg-slate-950 hover:bg-slate-850 hover:text-emerald-400 border border-slate-800 hover:border-emerald-500/30 text-emerald-500 font-black px-4 py-2.5 h-[42px] rounded-lg text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2"
-                title="Exportar Relatório PDF com Base no Isomento Territorial Atual"
+            {/* ELEITOR FILTER */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">4. Filtrar por Apoiador</span>
+              <select
+                id="filter-select-eleitor"
+                value={filterEleitor}
+                onChange={handleEleitorFilterChange}
+                className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-xs font-bold text-white outline-none transition cursor-pointer"
               >
-                <FileDown className="w-4 h-4" />
-                <span>Exportar PDF</span>
-              </button>
+                <option value="ALL">⭐ Todos os Apoiadores</option>
+                {availableEleitoresInFilter.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.nome}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
