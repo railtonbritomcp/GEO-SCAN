@@ -70,14 +70,14 @@ export default function CoordenadoresForm({
             <ShieldPlus className="w-6 h-6" />
           </span>
           <div>
-            <h3 className="font-extrabold text-white text-base md:text-lg">Cadastrar Liderança Focal</h3>
-            <p className="text-xs text-slate-400">Etapa 1: Territorial - Líder principal por município</p>
+            <h3 className="font-extrabold text-white text-base md:text-lg">Cadastrar Coordenador Regional</h3>
+            <p className="text-xs text-slate-400">Etapa 1: Territorial - Coordenador principal por município</p>
           </div>
         </div>
         {coordSuccess && (
           <span className="text-sm text-amber-450 bg-amber-955/60 border border-amber-500/30 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 animate-bounce font-bold select-none">
             <CheckCircle2 className="w-4 h-4 text-amber-400" />
-            Liderança Salva!
+            Coordenador Salvo!
           </span>
         )}
       </div>
@@ -87,7 +87,7 @@ export default function CoordenadoresForm({
           {/* Nome */}
           <div className="space-y-1.5">
             <label className="text-sm text-slate-300 font-extrabold flex items-center gap-1">
-              <span>Nome da Liderança Focal</span>
+              <span>Nome do Coordenador Regional</span>
               <span className="text-red-500">*</span>
             </label>
             <input
@@ -184,7 +184,7 @@ export default function CoordenadoresForm({
           {/* Meta de Votos */}
           <div className="space-y-1.5 md:col-span-2">
             <label className="text-sm text-slate-300 font-extrabold flex items-center gap-1">
-              <span>Meta de Votos (Macro Territory)</span>
+              <span>Meta de Votos</span>
               <span className="text-slate-550 font-normal">(Opcional)</span>
             </label>
             <input
@@ -205,7 +205,7 @@ export default function CoordenadoresForm({
           className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-4 px-5 rounded-lg text-sm flex items-center justify-center gap-2 transition cursor-pointer active:scale-98 shadow-md shadow-amber-500/10"
         >
           <PlusCircle className="w-5 h-5 animate-pulse" />
-          Salvar Liderança Focal
+          Salvar Coordenador Regional
         </button>
       </form>
     </div>

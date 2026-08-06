@@ -27,7 +27,7 @@ export default function CascadingHierarchyList({
       </h4>
 
       {coordenadoresRegionais.length === 0 ? (
-        <p className="text-sm text-slate-500 py-12 text-center font-bold">Nenhuma liderança focal encontrada.</p>
+        <p className="text-sm text-slate-500 py-12 text-center font-bold">Nenhum coordenador regional encontrado.</p>
       ) : (
         <div className="space-y-3">
           {coordenadoresRegionais.map((coord) => {
@@ -47,7 +47,7 @@ export default function CascadingHierarchyList({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono px-2 py-0.5 bg-amber-950/40 text-amber-500 border border-amber-900/30 rounded uppercase font-bold tracking-wider">
-                          Lid. Focal
+                          Coord. Reg.
                         </span>
                         <span className="font-black text-slate-100 text-sm">{coord.nome}</span>
                       </div>
@@ -58,7 +58,7 @@ export default function CascadingHierarchyList({
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     <span className="text-xs font-bold font-mono text-slate-500 px-2 py-1 bg-slate-950 rounded">
-                      {coordLiderancas.length} Apoiadores
+                      {coordLiderancas.length} Lideranças Focais
                     </span>
                     {coord.metaVotos && coord.metaVotos > 0 && (
                       <span className="text-[10px] font-black font-mono text-amber-500 bg-amber-950/20 px-2 py-0.5 rounded border border-amber-900/10 uppercase tracking-tighter">
@@ -72,7 +72,7 @@ export default function CascadingHierarchyList({
                 {isExpandedCoord && (
                   <div className="bg-slate-950/60 p-2 md:pl-6 space-y-2 border-l-2 border-slate-800 border-l-amber-900/30">
                     {coordLiderancas.length === 0 ? (
-                      <p className="text-xs text-slate-500 py-3 pl-4 font-bold">Nenhum apoiador associado.</p>
+                      <p className="text-xs text-slate-500 py-3 pl-4 font-bold">Nenhuma liderança focal associada.</p>
                     ) : (
                       coordLiderancas.map((lid) => {
                         const liderEleitores = eleitores.filter((e) => e.liderancaId === lid.id);
@@ -91,7 +91,7 @@ export default function CascadingHierarchyList({
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-mono px-1.5 py-0.5 bg-emerald-950/40 text-emerald-400 border border-emerald-900/30 rounded uppercase font-bold tracking-wider">
-                                      Apoiador
+                                      Lid. Focal
                                     </span>
                                     <span className="font-bold text-slate-200 text-sm">{lid.nome}</span>
                                   </div>

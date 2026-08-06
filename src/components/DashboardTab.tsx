@@ -304,13 +304,13 @@ export default function DashboardTab({
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105); // slate-600
     doc.text(`Municipio: ${filterMunicipio === "ALL" ? "TODOS OS MUNICÍPIOS" : filterMunicipio.toUpperCase()}`, 18, currentY + 11);
-    doc.text(`Apoiador: ${filterLider === "ALL" ? "TODOS OS APOIADORES" : (metrics.activeLeaders.find(l => l.id === filterLider)?.nome.toUpperCase() || "SELECIONADO")}`, 18, currentY + 16);
+    doc.text(`Liderança Focal: ${filterLider === "ALL" ? "TODAS AS LIDERANÇAS FOCAIS" : (metrics.activeLeaders.find(l => l.id === filterLider)?.nome.toUpperCase() || "SELECIONADA")}`, 18, currentY + 16);
     
-    // Active Lideranças Focais
+    // Active Coordenadores Regionais
     const activeCoordIds = new Set(metrics.activeLeaders.map(l => l.coordenadorRegionalId).filter(id => !!id));
     const activeCoords = coordenadoresRegionais.filter(c => activeCoordIds.has(c.id));
-    const coordNames = activeCoords.length > 0 ? activeCoords.map(c => c.nome).join(", ") : "NENHUMA LIDERANÇA VINCULADA";
-    doc.text(`Lideranças Focais: ${coordNames.toUpperCase()}`, 18, currentY + 21);
+    const coordNames = activeCoords.length > 0 ? activeCoords.map(c => c.nome).join(", ") : "NENHUM COORDENADOR VINCULADO";
+    doc.text(`Coordenadores Regionais: ${coordNames.toUpperCase()}`, 18, currentY + 21);
     doc.text(`Data Extracao: ${timestampStr}`, 18, currentY + 26);
     doc.text(`Meta Estadual Geral: ${globalGoal} votos`, 18, currentY + 31);
     
@@ -324,7 +324,7 @@ export default function DashboardTab({
     const progressPercent = metrics.progressoMetaPct;
 
     doc.setFont("helvetica", "bold");
-    doc.text(`Apoiadores Atendidos: ${totLeaders}`, 14, currentY); // Repositioned
+    doc.text(`Lideranças Focais Ativas: ${totLeaders}`, 14, currentY); // Repositioned
     doc.text(`Eleitores Cadastrados: ${totSupporters}`, 14, currentY + 5);
     currentY += 10;
 
@@ -348,7 +348,7 @@ export default function DashboardTab({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(71, 85, 105);
-    doc.text("COMPROMISSO GARANTIDO (Eleitores e Líderes)", 112, currentY + 4);
+    doc.text("COMPROMISSO GARANTIDO (Eleitores e Lideranças)", 112, currentY + 4);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(16, 185, 129); // emerald-500
@@ -360,7 +360,7 @@ export default function DashboardTab({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10.5);
     doc.setTextColor(15, 23, 42);
-    doc.text("MAPEAMENTO EM CASCATA (UF -> MUNICÍPIO -> APOIADOR -> ELEITORES)", 14, currentY);
+    doc.text("MAPEAMENTO EM CASCATA (UF -> MUNICÍPIO -> COORDENADOR -> LIDERANÇA FOCAL -> ELEITORES)", 14, currentY);
     currentY += 5;
 
     doc.setDrawColor(203, 213, 225); // slate-300
@@ -394,13 +394,13 @@ export default function DashboardTab({
       const leaderVoters = metrics.activeEleitores.filter((e) => e.liderancaId === lid.id);
       
       if (leaderVoters.length === 0) {
-        // Even without voters, the Apoiador counts as a committed vote
+        // Even without voters, the Leader counts as a committed vote
         tableBody.push([
           muni,
           bairro,
           focal,
           apoiador,
-          "(Voto Próprio do Apoiador)",
+          "(Voto Próprio da Liderança)",
           lid.telefone || "N/A"
         ]);
       } else {
@@ -425,7 +425,7 @@ export default function DashboardTab({
     } else {
       autoTable(doc, {
         startY: currentY,
-        head: [["MUNICÍPIO", "BAIRRO", "LIDERANÇA FOCAL", "APOIADOR ELEITORAL", "ELEITOR CADASTRADO", "CONTATO"]],
+        head: [["MUNICÍPIO", "BAIRRO", "COORDENADOR REGIONAL", "LIDERANÇA FOCAL", "ELEITOR CADASTRADO", "CONTATO"]],
         body: tableBody,
         theme: "striped",
         styles: { fontSize: 6.5, cellPadding: 1.2 },
@@ -548,7 +548,7 @@ export default function DashboardTab({
               WhatsApp da Coordenação Geral
             </h3>
             <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
-              Defina o número de WhatsApp do Coordenador de Campanha. Quando os apoiadores executarem o auto-cadastro territorial a partir do link do líder, o sistema direcionará o comprovante de homologação com o link seguro de 1 clique diretamente para este número!
+              Defina o número de WhatsApp do Coordenador de Campanha. Quando as lideranças focais executarem o auto-cadastro territorial a partir do link do coordenador, o sistema direcionará o comprovante de homologação com o link seguro de 1 clique diretamente para este número!
             </p>
           </div>
 
@@ -752,14 +752,14 @@ export default function DashboardTab({
 
             {/* LIDERANCA FILTER */}
             <div className="flex flex-col gap-1.5 w-full sm:w-64">
-              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">Filtrar por Apoiador</span>
+              <span className="text-xs uppercase font-extrabold text-slate-400 font-mono">Filtrar por Liderança Focal</span>
               <select
                 id="filter-select-lider"
                 value={filterLider}
                 onChange={(e) => setFilterLider(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 rounded-lg px-3.5 py-2.5 text-sm font-bold text-white outline-none transition cursor-pointer"
               >
-                <option value="ALL">👤 Todos os Apoiadores</option>
+                <option value="ALL">👤 Todas as Lideranças Focais</option>
                 {availableLeadersInFilter.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.nome} ({l.bairro})
@@ -788,20 +788,20 @@ export default function DashboardTab({
       {/* THREE REQUIRED CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5" id="dashboard-metrics-summary">
         
-        {/* CARD 1: META DO APOIADOR */}
+        {/* CARD 1: META DA LIDERANÇA FOCAL */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 md:p-8 relative overflow-hidden" id="metric-card-meta-macro">
           <div className="absolute right-3 top-3 opacity-10">
             <Target className="w-14 h-14 text-emerald-450" />
           </div>
           <p className="text-xs uppercase font-mono tracking-widest font-extrabold text-slate-400 mb-1">
-            Meta do Apoiador
+            Meta da Liderança Focal
           </p>
           <div className="flex items-baseline gap-2.5 mt-3">
             <span className="text-4xl md:text-5xl font-black text-white font-mono">{metrics.metaLiderTotal}</span>
             <span className="text-xs md:text-sm text-slate-400 font-bold block">votos pactuados (Macro)</span>
           </div>
           <p className="text-xs text-slate-300 mt-4 pt-3 border-t border-slate-800/60 leading-relaxed">
-            Metas macros estabelecidas pelos apoiadores sob filtro corrente. Representa o alvo contratado para compromisso de votos.
+            Metas macros estabelecidas pelas lideranças focais sob filtro corrente. Representa o alvo contratado para compromisso de votos.
           </p>
         </div>
 
@@ -811,14 +811,14 @@ export default function DashboardTab({
             <Users className="w-14 h-14 text-blue-400" />
           </div>
           <p className="text-xs uppercase font-mono tracking-widest font-extrabold text-slate-400 mb-1">
-            Votos Garantidos (Eleitores e Apoiadores)
+            Votos Garantidos (Eleitores e Lideranças Focais)
           </p>
           <div className="flex items-baseline gap-2.5 mt-3">
             <span className="text-4xl md:text-5xl font-black text-slate-100 font-mono">{metrics.votosGantidosTotal}</span>
             <span className="text-xs md:text-sm text-slate-400 font-bold block">eleitores nominais</span>
           </div>
           <p className="text-xs text-slate-300 mt-4 pt-3 border-t border-slate-800/60 leading-relaxed">
-            Somatório de compromissos individuais garantidos nominalmente por cada eleitor e apoiador cadastrado sob filtros selecionados.
+            Somatório de compromissos individuais garantidos nominalmente por cada eleitor e liderança focal cadastrada sob filtros selecionados.
           </p>
         </div>
 

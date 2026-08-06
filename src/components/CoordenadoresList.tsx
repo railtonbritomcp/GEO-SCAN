@@ -30,10 +30,10 @@ export default function CoordenadoresList({
       <div className="flex flex-col gap-2 mb-4 pb-3 border-b border-slate-800">
         <h4 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
           <ShieldPlus className="w-5 h-5 text-amber-400" />
-          Lideranças Focais Ativas ({coordenadoresRegionais.length})
+          Coordenadores Regionais Ativos ({coordenadoresRegionais.length})
         </h4>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Lideranças territoriais de primeiro escalão. Eles gerenciam os apoiadores eleitorais na comunidade.
+          Coordenadores regionais de primeiro escalão. Eles gerenciam as lideranças focais na comunidade.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function CoordenadoresList({
         </div>
         <input
           type="text"
-          placeholder="Pesquisar liderança focal por nome..."
+          placeholder="Pesquisar coordenador regional por nome..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-slate-950 border border-slate-850 focus:border-amber-500/50 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition"
@@ -53,7 +53,7 @@ export default function CoordenadoresList({
       <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
         {filteredCoordenadores.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-10 font-bold">
-            {searchQuery ? "Nenhum resultado encontrado para sua pesquisa." : "Nenhuma liderança focal cadastrada."}
+            {searchQuery ? "Nenhum resultado encontrado para sua pesquisa." : "Nenhum coordenador regional cadastrado."}
           </p>
         ) : (
           filteredCoordenadores.map((coord) => {
@@ -71,7 +71,7 @@ export default function CoordenadoresList({
                         type="button"
                         onClick={() => onStartEditCoord(coord)}
                         className="bg-slate-900 border border-slate-800 p-1 rounded-md text-slate-400 hover:text-amber-400 hover:border-amber-500/30 transition cursor-pointer"
-                        title="Corrigir dados cadastrais da liderança"
+                        title="Corrigir dados cadastrais do coordenador"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
@@ -90,7 +90,7 @@ export default function CoordenadoresList({
                     ) : null}
                   </div>
                   <span className="text-[10.5px] font-mono text-amber-300 font-bold bg-amber-950/50 px-2.5 py-1 px-2 border border-amber-950 rounded">
-                    {associatedLidCount} apoiador(es)
+                    {associatedLidCount} liderança(s) focal(is)
                   </span>
                 </div>
 
@@ -122,7 +122,7 @@ export default function CoordenadoresList({
                       onClick={() => onDeleteCoordenador(coord.id)}
                       className="text-[10px] text-red-450 hover:text-red-300 transition font-bold"
                     >
-                      Remover Liderança
+                      Remover Coordenador
                     </button>
                   )}
                 </div>

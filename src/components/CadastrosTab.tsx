@@ -386,8 +386,8 @@ export default function CadastrosTab({
               </span>
             </div>
             <div>
-              <h4 className="font-extrabold text-sm text-slate-200">Lideranças Focais</h4>
-              <p className="text-[11.5px] text-slate-400 mt-0.5 leading-snug">Vincule líderes e suas metas estratégicas.</p>
+              <h4 className="font-extrabold text-sm text-slate-200">Coordenadores Regionais</h4>
+              <p className="text-[11.5px] text-slate-400 mt-0.5 leading-snug">Vincule coordenadores e suas metas estratégicas.</p>
             </div>
           </button>
 
@@ -417,8 +417,8 @@ export default function CadastrosTab({
               </span>
             </div>
             <div>
-              <h4 className="font-extrabold text-sm text-slate-200">Apoiadores Eleitorais</h4>
-              <p className="text-[11.5px] text-slate-400 mt-0.5 leading-snug">Registros de apoiadores locais da comunidade.</p>
+              <h4 className="font-extrabold text-sm text-slate-200">Lideranças Focais</h4>
+              <p className="text-[11.5px] text-slate-400 mt-0.5 leading-snug">Registros de lideranças locais da comunidade.</p>
             </div>
           </button>
 
@@ -571,14 +571,14 @@ export default function CadastrosTab({
                 <Target className="w-6 h-6" />
               </span>
               <div>
-                <h3 className="font-extrabold text-white text-base md:text-lg">2. Cadastrar Apoiador Eleitoral</h3>
-                <p className="text-xs text-slate-400">Compromisso micro de votos vinculado à Liderança Territorial</p>
+                <h3 className="font-extrabold text-white text-base md:text-lg">2. Cadastrar Liderança Focal</h3>
+                <p className="text-xs text-slate-400">Compromisso micro de votos vinculado ao Coordenador Regional</p>
               </div>
             </div>
             {lidSuccess && (
               <span className="text-sm text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 animate-bounce font-bold">
                 <CheckCircle2 className="w-4 h-4 text-emerald-450" />
-                Apoiador Salvo!
+                Liderança Salva!
               </span>
             )}
           </div>
@@ -588,7 +588,7 @@ export default function CadastrosTab({
               {/* Nome */}
               <div className="space-y-1.5">
                 <label className="text-sm text-slate-300 font-extrabold flex items-center gap-1">
-                  <span>Nome do Apoiador</span>
+                  <span>Nome da Liderança Focal</span>
                   <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -670,7 +670,7 @@ export default function CadastrosTab({
               {/* Coordenador Regional Cascata */}
               <div className="space-y-1.5 md:col-span-2 font-sans">
                 <label className="text-sm text-slate-300 font-extrabold flex items-center justify-between">
-                  <span>Liderança Territorial Responsável</span>
+                  <span>Coordenador Regional Responsável</span>
                   <span className="text-xs bg-emerald-950/60 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold uppercase border border-emerald-900/30">Filtro por Município</span>
                 </label>
                 <select
@@ -680,16 +680,16 @@ export default function CadastrosTab({
                   onChange={(e) => setLidCoordenadorId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg p-3.5 text-sm text-white outline-none transition cursor-pointer font-bold"
                 >
-                  <option value="">-- Selecione a Liderança ativa em {lidMunicipio} --</option>
+                  <option value="">-- Selecione o Coordenador Regional ativo em {lidMunicipio} --</option>
                   {availableCoordenadoresForLider.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.nome} (Territorial {c.municipio})
+                      {c.nome} (Regional {c.municipio})
                     </option>
                   ))}
                 </select>
                 {availableCoordenadoresForLider.length === 0 && (
                   <p className="text-xs text-amber-500 mt-2 font-bold bg-amber-950/20 border border-amber-900/25 p-3 rounded-lg leading-relaxed">
-                    ⚠️ Não há lideranças territoriais cadastradas em <strong>{lidMunicipio}</strong> neste momento. Por favor, cadastre a liderança territorial para {lidMunicipio} primeiro na <strong>Etapa 1: Territorial</strong>.
+                    ⚠️ Não há coordenadores regionais cadastrados em <strong>{lidMunicipio}</strong> neste momento. Por favor, cadastre o coordenador regional para {lidMunicipio} primeiro na <strong>Etapa 1: Territorial</strong>.
                   </p>
                 )}
               </div>
@@ -743,7 +743,7 @@ export default function CadastrosTab({
               <div className="space-y-2 md:col-span-2 bg-slate-950/40 border border-slate-850 p-4 rounded-xl">
                 <label className="text-sm text-slate-300 font-extrabold block mb-1">Cálculo de Meta Preferencial</label>
                 <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                  Escolha se a meta de votos deste apoiador será firmada por acordo macro manual ou somando dinamicamente os eleitores vinculados diretamente.
+                  Escolha se a meta de votos desta liderança focal será firmada por acordo macro manual ou somando dinamicamente os eleitores vinculados diretamente.
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -755,7 +755,7 @@ export default function CadastrosTab({
                         : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300"
                     }`}
                   >
-                    👤 Por Apoiador (Manual)
+                    👤 Por Liderança Focal (Manual)
                   </button>
                   <button
                     type="button"
@@ -775,7 +775,7 @@ export default function CadastrosTab({
               {lidCalculoMeta === "lider" ? (
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm text-slate-300 font-extrabold flex items-center justify-between">
-                    <span>Meta Macro (Alvo de votos acordado com o Apoiador)</span>
+                    <span>Meta Macro (Alvo de votos acordado com a Liderança Focal)</span>
                     <span className="text-xs bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase font-bold tracking-wider border border-emerald-900/30">Manual</span>
                   </label>
                   <input
@@ -791,7 +791,7 @@ export default function CadastrosTab({
                 </div>
               ) : (
                 <div className="p-4 bg-blue-955/20 border border-blue-900/30 rounded-lg text-sm text-blue-300 md:col-span-2 leading-relaxed">
-                  📢 <strong>Meta Dinâmica Ativada:</strong> O compromisso macro deste apoiador será determinado <strong>automaticamente</strong> pela soma de todos os eleitores vinculados diretos.
+                  📢 <strong>Meta Dinâmica Ativada:</strong> O compromisso macro desta liderança focal será determinado <strong>automaticamente</strong> pela soma de todos os eleitores vinculados diretos.
                 </div>
               )}
             </div>
@@ -802,7 +802,7 @@ export default function CadastrosTab({
               className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-4 px-5 rounded-lg text-sm flex items-center justify-center gap-2 transition cursor-pointer active:scale-98 shadow-md shadow-emerald-500/10"
             >
               <PlusCircle className="w-5 h-5 animate-pulse" />
-              Salvar Apoiador Eleitoral
+              Salvar Liderança Focal
             </button>
           </form>
         </div>
@@ -818,7 +818,7 @@ export default function CadastrosTab({
               </span>
               <div>
                 <h3 className="font-extrabold text-white text-base md:text-lg">3. Cadastrar Eleitor</h3>
-                <p className="text-xs text-slate-400">Voto vinculado ao Apoiador Eleitoral</p>
+                <p className="text-xs text-slate-400">Voto vinculado à Liderança Focal</p>
               </div>
             </div>
             {elSuccess && (
@@ -831,7 +831,7 @@ export default function CadastrosTab({
 
           {liderancas.length === 0 ? (
             <div className="bg-amber-955/20 border border-amber-500/20 text-amber-305 text-sm p-6 rounded-lg text-center font-bold leading-relaxed">
-              ⚠️ Você precisa ter pelo menos uma Liderança cadastrada no território para poder associar Eleitores no sistema.
+              ⚠️ Você precisa ter pelo menos uma Liderança Focal cadastrada no território para poder associar Eleitores no sistema.
             </div>
           ) : (
             <form onSubmit={handleElSubmit} className="space-y-5">
@@ -879,7 +879,7 @@ export default function CadastrosTab({
 
               <div className="space-y-1.5">
                 <label className="text-sm text-slate-300 font-extrabold flex items-center justify-between">
-                  <span>Apoiador Eleitoral Responsável</span>
+                  <span>Liderança Focal Responsável</span>
                 </label>
                 <select
                   id="el-select-lideranca"
@@ -888,7 +888,7 @@ export default function CadastrosTab({
                   onChange={(e) => setElLiderancaId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 focus:border-pink-500 rounded-lg p-3.5 text-sm text-white outline-none transition cursor-pointer font-bold"
                 >
-                  <option value="">-- Selecione o Apoiador --</option>
+                  <option value="">-- Selecione a Liderança Focal --</option>
                   {liderancas.map((lid) => (
                      <option key={lid.id} value={lid.id}>
                         {lid.nome} ({lid.municipio} - {lid.bairro})
@@ -946,10 +946,10 @@ export default function CadastrosTab({
       <div className="flex flex-col gap-2 mb-4 pb-3 border-b border-slate-800">
             <h4 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
               <MapPin className="w-5 h-5 text-emerald-400" />
-              Apoiadores Eleitorais Ativos ({liderancas.length})
+              Lideranças Focais Ativas ({liderancas.length})
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Apoiadores locais registrados. Eles estão vinculados às Lideranças Focais do território.
+              Lideranças focais registradas. Elas estão vinculadas aos Coordenadores Regionais do território.
             </p>
           </div>
 
@@ -959,7 +959,7 @@ export default function CadastrosTab({
             </div>
             <input
               type="text"
-              placeholder="Pesquisar apoiador por nome..."
+              placeholder="Pesquisar liderança focal por nome..."
               value={searchLidQuery}
               onChange={(e) => setSearchLidQuery(e.target.value)}
               className="w-full bg-slate-950 border border-slate-850 focus:border-emerald-500/50 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-600 outline-none transition"
@@ -975,7 +975,7 @@ export default function CadastrosTab({
               if (filteredLids.length === 0) {
                 return (
                   <p className="text-sm text-slate-500 text-center py-10 font-bold">
-                    {searchLidQuery ? "Nenhum apoiador encontrado." : "Nenhuma liderança cadastrada."}
+                    {searchLidQuery ? "Nenhuma liderança focal encontrada." : "Nenhuma liderança focal cadastrada."}
                   </p>
                 );
               }
@@ -1024,12 +1024,12 @@ export default function CadastrosTab({
                           const coordMatch = (coordenadoresRegionais || []).find((c) => c.id === lid.coordenadorRegionalId);
                           return coordMatch ? (
                             <p className="text-[10.5px] text-amber-450 font-extrabold uppercase tracking-wider flex items-center gap-1.5 mt-1">
-                              <span className="text-slate-500 font-sans font-normal text-[10px]">Liderança Territorial:</span>
+                              <span className="text-slate-500 font-sans font-normal text-[10px]">Coordenador Regional:</span>
                               <span>{coordMatch.nome} ({coordMatch.municipio})</span>
                             </p>
                           ) : (
                             <p className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider flex items-center gap-1 mt-1">
-                              ⚠️ Sem Liderança Territorial vinculada!
+                              ⚠️ Sem Coordenador Regional vinculado!
                             </p>
                           );
                         })()}
@@ -1249,7 +1249,7 @@ export default function CadastrosTab({
                           </div>
                         )}
                         <p className="text-[10.5px] text-pink-400 font-extrabold uppercase tracking-wider flex items-center gap-1.5 mt-1">
-                          <span className="text-slate-500 font-sans font-normal text-[10px]">Liderança:</span>
+                          <span className="text-slate-500 font-sans font-normal text-[10px]">Liderança Focal:</span>
                           <span>{liderancaMatch ? liderancaMatch.nome : "Desconhecido"}</span>
                         </p>
                         <p className="text-xs text-slate-400 flex items-center gap-1 mt-1 font-semibold">
@@ -1352,8 +1352,8 @@ export default function CadastrosTab({
                 <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800/80">
                   <p className="font-sans text-xs text-emerald-400 font-black mb-1">Dados do vínculo seguindo esta ordem:</p>
                   <div className="flex flex-col text-[11px] text-slate-400 font-mono space-y-1">
+                    <p>&bull; Coordenador Regional</p>
                     <p>&bull; Liderança focal</p>
-                    <p>&bull; Apoiadores</p>
                     <p>&bull; Eleitores finais</p>
                   </div>
                 </div>
@@ -1362,7 +1362,7 @@ export default function CadastrosTab({
                   type="button"
                   onClick={() => {
                     const u = `${window.location.origin}${window.location.pathname}?coordId=${sharingCoord.id}&coordNome=${encodeURIComponent(sharingCoord.nome)}&municipio=${encodeURIComponent(sharingCoord.municipio)}${coordinatorWhatsapp ? `&coordWhatsapp=${encodeURIComponent(coordinatorWhatsapp)}` : ""}`;
-                    const msg = `Olá, *${sharingCoord.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro.\n\nDados do vínculo seguindo esta ordem: Liderança focal, apoiadores e eleitores finais.\n\n🔗 *Link:* ${u}`;
+                    const msg = `Olá, *${sharingCoord.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro.\n\nDados do vínculo seguindo esta ordem: Coordenador Regional, Liderança Focal e Eleitores finais.\n\n🔗 *Link:* ${u}`;
                     
                     let phoneParam = "";
                     if (sharingCoord.telefone) {
@@ -1412,7 +1412,7 @@ export default function CadastrosTab({
 
             <div className="space-y-4">
               <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-850">
-                <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider font-mono">Liderança territorial</span>
+                <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider font-mono">Liderança focal</span>
                 <strong className="text-sm text-emerald-400 uppercase font-black">{sharingLider.nome}</strong>
                 <span className="text-xs text-slate-400 block mt-1 font-semibold">📍 Base: {sharingLider.municipio} &bull; {sharingLider.bairro}</span>
               </div>
@@ -1454,8 +1454,8 @@ export default function CadastrosTab({
                 <div className="bg-slate-950/50 p-3 rounded-lg border border-slate-800/80">
                   <p className="font-sans text-xs text-emerald-400 font-black mb-1">Dados do vínculo seguindo esta ordem:</p>
                   <div className="flex flex-col text-[11px] text-slate-400 font-mono space-y-1">
+                    <p>&bull; Coordenador Regional</p>
                     <p>&bull; Liderança focal</p>
-                    <p>&bull; Apoiadores</p>
                     <p>&bull; Eleitores finais</p>
                   </div>
                 </div>
@@ -1464,7 +1464,7 @@ export default function CadastrosTab({
                   type="button"
                   onClick={() => {
                     const u = `${window.location.origin}${window.location.pathname}?liderId=${sharingLider.id}&liderNome=${encodeURIComponent(sharingLider.nome)}&municipio=${encodeURIComponent(sharingLider.municipio)}${sharingLider.telefone ? `&liderWhatsapp=${encodeURIComponent(sharingLider.telefone)}` : ""}`;
-                    const msg = `Olá, *${sharingLider.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro (Etapa 3).\n\nDados do vínculo seguindo esta ordem: Liderança focal, apoiadores e eleitores finais.\n\n🔗 *Link:* ${u}`;
+                    const msg = `Olá, *${sharingLider.nome}*! Aqui está o seu link exclusivo do GEO SCAN para auto-cadastro (Etapa 3).\n\nDados do vínculo seguindo esta ordem: Coordenador Regional, Liderança Focal e Eleitores finais.\n\n🔗 *Link:* ${u}`;
                     
                     let phoneParam = "";
                     if (sharingLider.telefone) {
@@ -1504,7 +1504,7 @@ export default function CadastrosTab({
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
                 <Edit2 className="w-4.5 h-4.5 text-emerald-450" />
-                Corrigir Dados da Liderança
+                Corrigir Dados da Liderança Focal
               </h3>
               <button
                 type="button"
@@ -1518,7 +1518,7 @@ export default function CadastrosTab({
             <div className="space-y-4 font-sans text-left">
               {/* Nome */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-300 font-extrabold uppercase tracking-wider block">Nome do Líder</label>
+                <label className="text-xs text-slate-300 font-extrabold uppercase tracking-wider block">Nome da Liderança Focal</label>
                 <input
                   type="text"
                   required
@@ -1742,7 +1742,7 @@ export default function CadastrosTab({
               
               <div className="space-y-1.5">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                  Liderança de Vínculo <span className="text-emerald-400">*</span>
+                  Liderança Focal de Vínculo <span className="text-emerald-400">*</span>
                 </label>
                 <select
                   required
@@ -1750,7 +1750,7 @@ export default function CadastrosTab({
                   onChange={(e) => setEditElLiderancaId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg p-3 text-sm text-slate-100 outline-none transition cursor-pointer"
                 >
-                  <option value="" disabled>Selecione uma liderança...</option>
+                  <option value="" disabled>Selecione uma liderança focal...</option>
                   {liderancas.map((l) => (
                     <option key={l.id} value={l.id}>{l.nome} ({l.municipio} - {l.bairro})</option>
                   ))}
